@@ -6,7 +6,8 @@ const passport = require("passport");
 const cookieParser = require("cookie-parser");
 const flash = require("express-flash");
 const session = require("express-session");
-const dotenv = require("dotenv").config();
+require("dotenv").config();
+const { requireAuth } = require("./middleware/auth");
 const app = express();
 
 const {
@@ -22,13 +23,13 @@ const User = require("./models/User");
 //EJS
 app.set("view engine", "ejs");
 
-//Body Parser
+//BODY PARSER
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static("views"));
 
-//Express Session
+//EXPRESS SESSION
 app.use(flash());
 app.use(
   session({
@@ -38,10 +39,10 @@ app.use(
   })
 );
 
-//Connect Flash
+//CONNECT FLASH
 app.use(flash());
 
-//Global Variables
+//GLOBAL VARIABLES FOR EJS
 app.use((req, res, next) => {
   res.locals.success_msg = req.flash("success_msg");
   res.locals.error_msg = req.flash("error_msg");
@@ -49,7 +50,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// DATABASE CONNECTION
+//DATABASE CONNECTION
 sequelize
   .authenticate()
   .then(() => {
@@ -63,10 +64,12 @@ sequelize
 app.get("/", renderHomePage);
 app.get("/signin", renderSigninPage);
 app.get("/signup", renderSignupPage);
-app.get("/dashboard", renderDashboard);
-
 app.post("/signup", signupUser);
 app.post("/signin", signinUser);
 
+//Protected Routes
+app.get("/dashboard", requireAuth, renderDashboard);
+
+//Port Listener
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server is connected on ${PORT}`));
