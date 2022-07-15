@@ -17,6 +17,7 @@ const {
   renderDashboard,
   signupUser,
   signinUser,
+  logoutUser
 } = require("./controllers/userAPI");
 const User = require("./models/User");
 
@@ -66,6 +67,8 @@ app.get("/signin", renderSigninPage);
 app.get("/signup", renderSignupPage);
 app.post("/signup", signupUser);
 app.post("/signin", signinUser);
+app.get('/logout', logoutUser);
+
 
 //Protected Routes
 app.get("/dashboard", requireAuth, renderDashboard);

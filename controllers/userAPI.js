@@ -100,8 +100,6 @@ const signinUser = async (req, res) => {
     //User Exist Case
 
     // 2. Compares the password with existing password in the database.
-    const { password: hashedPasswored } = user;
-    console.log(`password: ${password} hashed: ${hashedPasswored}`);
     const isSame = await bcrypt.compare(password, user.password);
 
     if (isSame) {
@@ -138,6 +136,14 @@ const signinUser = async (req, res) => {
   }
 };
 
+const logoutUser = async (req, res) => {
+
+  //Setting jwt token to empty string and setting its age to 1ms.
+  res.cookie("jwt", "", {maxAage:1});
+  res.redirect('/'); 
+
+};
+
 module.exports = {
   renderHomePage,
   renderSignupPage,
@@ -145,4 +151,5 @@ module.exports = {
   renderDashboard,
   signupUser,
   signinUser,
+  logoutUser
 };

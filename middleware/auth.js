@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const requireAuth = (req, res, next) => {
+  //Getting Token from Browser's local storage.
   const token = req.cookies.jwt;
 
   //If token exist in browser cookies
