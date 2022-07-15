@@ -1,6 +1,7 @@
 const Sequelize = require("sequelize");
 const sequelize = require("../database/connection");
 const bcrypt = require("bcrypt");
+require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
@@ -55,10 +56,16 @@ const signupUser = async (req, res) => {
         password: hashedPassword,
       });
 
+      //Changings are going to be made from this point onwards.
+
       if (user) {
-        let token = jwt.sign({ id: user.id }, "ydwygyegyegcveyvcyegc", {
-          expiresIn: 1 * 24 * 60 * 60 * 1000,
-        });
+        let token = jwt.sign(
+          { id: user.id },
+          "fkdgkjanfdkjasndfjsandflsakdnflsadjf",
+          {
+            expiresIn: "1hr",
+          }
+        );
         res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
         console.log("user", JSON.stringify(user, null, 2));
         console.log("Token: " + token);
@@ -101,9 +108,13 @@ const signinUser = async (req, res) => {
       //Password Matches
 
       // 3. Generate a token with the user id using ( JWT )
-      let token = jwt.sign({ id: user.id }, process.env.secretKey, {
-        expiresIn: 1 * 24 * 60 * 60 * 1000,
-      });
+      let token = jwt.sign(
+        { id: user.id },
+        "fkdgkjanfdkjasndfjsandflsakdnflsadjf",
+        {
+          expiresIn: "1hr",
+        }
+      );
 
       //4.  Set a cookie with Cookie-Parser for the user
       res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
