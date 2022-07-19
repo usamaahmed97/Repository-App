@@ -1,27 +1,25 @@
-'use strict';
+"use strict";
 
 module.exports = {
-  async up (queryInterface, Sequelize) {
-    
-    await queryInterface.createTable('repository', {
-
+  async up(queryInterface, Sequelize) {
+    await queryInterface.createTable("repository", {
       id: {
         type: Sequelize.INTEGER,
         primaryKey: true,
         allowNull: false,
         autoIncrement: true,
       },
-    
+
       repositoryName: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-    
+
       repositoryDescription: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-    
+
       userId: {
         type: Sequelize.INTEGER,
         reference: {
@@ -29,15 +27,10 @@ module.exports = {
           key: "id",
         },
       },
-
-    })
-
+    });
   },
 
-  async down (queryInterface, Sequelize) {
-   
+  async down(queryInterface, Sequelize) {
     await queryInterface.dropTable("repository");
-
-  }
+  },
 };
-

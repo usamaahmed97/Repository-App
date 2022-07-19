@@ -1,0 +1,52 @@
+<%- include("secondHeader") -%>
+
+<div class="container">
+    <div class="py-5 text-center">
+        
+        <h2>Edit User</h2>
+        <% if(typeof (editErrors)!= 'undefined') {%> <%
+          editErrors.forEach(function(error){%>
+          <div class="alert alert-danger" role="alert"><%= error.msg %></div>
+    
+          <% }); %> <% } %>
+            <form class="needs-validation" novalidate action="/saveEditUser" method = "post">
+              <div class="row g-3">
+                <div class="col-sm-6">
+                  <label for="firstName" class="form-label">First name</label>
+                  <input type="text" class="form-control" name = "firstName" value="<%= firstName%>" required>
+                  <div class="invalid-feedback">
+                    Valid first name is required.
+                  </div>
+                </div>
+    
+                <div class="col-sm-6">
+                  <label for="lastName" class="form-label">Last name</label>
+                  <input type="text" class="form-control" name = "lastName" value="<%=lastName%>" required>
+                  <div class="invalid-feedback">
+                    Valid last name is required.
+                  </div>
+                </div>
+
+                <div class="col-sm-6">
+                    <label for="firstName" class="form-label">Email</label>
+                    <input type="text" class="form-control" name = "email" value="<%= email%>" required>
+                    <div class="invalid-feedback">
+                      Valid first email is required.
+                    </div>
+                  </div>
+
+                  <div class="col-sm-6">
+                    <label for="firstName" class="form-label">Password</label>
+                    <input type="password" class="form-control" name = "password" value="" required>
+                    <div class="invalid-feedback">
+                      Valid password name is required.
+                    </div>
+                  </div>
+                  <button class="w-100 btn btn-lg btn-primary" type="submit">Save Changes</button>
+            </form>
+              
+
+    </div>         
+
+</div>
+<%- include("footer") -%>
