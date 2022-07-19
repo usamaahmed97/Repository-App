@@ -32,4 +32,4 @@ const Repository = sequelize.define("repository", {
 User.hasMany(Repository);
 Repository.belongsTo(User);
 
-module.exports = {Repository};
+module.exports = Repository;

@@ -8,6 +8,9 @@ const flash = require("express-flash");
 const session = require("express-session");
 require("dotenv").config();
 const { requireAuth } = require("./middleware/auth");
+const User = require("./models/User");
+const Repository = require("./models/Repository");
+
 const app = express();
 
 const {
@@ -17,9 +20,20 @@ const {
   renderDashboard,
   signupUser,
   signinUser,
-  logoutUser
+  logoutUser,
+  deleteUser,
+  renderEditUserPage,
+  saveEditUser,
 } = require("./controllers/userAPI");
-const User = require("./models/User");
+
+const {
+  renderYourRepositoriesPage,
+  createRepositoryPage,
+  createYourRepository,
+  deleteYourRepositories,
+  renderEditRepositoriesPage,
+  editRepository,
+} = require("./controllers/repositoryAPI");
 
 //EJS
 app.set("view engine", "ejs");
@@ -61,18 +75,33 @@ sequelize
     console.log(`DB Connection Error: ${err}`);
   });
 
-//HOME PAGE RENDERING
+//HOME PAGE
 app.get("/", renderHomePage);
+
+//SIGN IN
 app.get("/signin", renderSigninPage);
+app.post("/signin", signinUser);
+app.get("/logout", logoutUser);
+
+//SIGN UP
 app.get("/signup", renderSignupPage);
 app.post("/signup", signupUser);
-app.post("/signin", signinUser);
-app.get('/logout', logoutUser);
 
+//DASHBOARD
+app.get("/dashboard/:id", requireAuth, renderDashboard);
 
-//Protected Routes
-app.get("/dashboard", requireAuth, renderDashboard);
+//EDIT PAGE
+app.get("/editUser", requireAuth, renderEditUserPage);
+app.get("/deleteUser", requireAuth, deleteUser);
+app.post("/saveEditUser", requireAuth, saveEditUser);
 
+//REPOSITORIES
+app.get("/yourRepositories", requireAuth, renderYourRepositoriesPage);
+app.get("/createRepository", requireAuth, createRepositoryPage);
+app.post("/createYourRepository", requireAuth, createYourRepository);
+app.get("/yourRepositories/:id/delete", requireAuth, deleteYourRepositories);
+app.get("/yourRepositories/:id/edit", requireAuth, renderEditRepositoriesPage);
+app.post("/yourRepositories/edit", requireAuth, editRepository);
 //Port Listener
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server is connected on ${PORT}`));

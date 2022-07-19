@@ -4,6 +4,8 @@ const bcrypt = require("bcrypt");
 require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const Repository = require("../models/Repository");
+const cookieParser = require("cookie-parser");
 
 const renderHomePage = (req, res) => {
   res.render("home");
@@ -17,8 +19,27 @@ const renderSigninPage = (req, res) => {
   res.render("signin");
 };
 
-const renderDashboard = (req, res) => {
-  res.render("dashboard");
+const renderDashboard = async (req, res) => {
+  // Find the signed in user ID from the cookies.
+
+  const id = req.cookies.userData.id;
+  const firstName = req.cookies.userData.firstName;
+  const secondName = req.cookies.userData.secondName;
+  const email = req.cookies.userData.email;
+
+  if (req.params.id == id) {
+    // user ID passed through params matches with the user ID stores in cookies.
+    // Displaying all the repos on Dashboard
+
+    //Getting all the repos
+    const allRepositories = await Repository.findAll({ raw: true });
+    res.cookie("allRepositories", allRepositories);
+
+    res.render("dashboard", { firstName, allRepositories });
+  } else {
+    //User is trying to pass some other ID in the params that does not match with the ID stored in cookies.
+    res.redirect("/signin");
+  }
 };
 
 const signupUser = async (req, res) => {
@@ -56,16 +77,10 @@ const signupUser = async (req, res) => {
         password: hashedPassword,
       });
 
-      //Changings are going to be made from this point onwards.
-
       if (user) {
-        let token = jwt.sign(
-          { id: user.id },
-          "fkdgkjanfdkjasndfjsandflsakdnflsadjf",
-          {
-            expiresIn: "1hr",
-          }
-        );
+        let token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+          expiresIn: "1hr",
+        });
         res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
         console.log("user", JSON.stringify(user, null, 2));
         console.log("Token: " + token);
@@ -105,14 +120,13 @@ const signinUser = async (req, res) => {
     if (isSame) {
       //Password Matches
 
+      //Store the user in a cookie.
+      res.cookie("userData", user);
+
       // 3. Generate a token with the user id using ( JWT )
-      let token = jwt.sign(
-        { id: user.id },
-        "fkdgkjanfdkjasndfjsandflsakdnflsadjf",
-        {
-          expiresIn: "1hr",
-        }
-      );
+      let token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+        expiresIn: "1hr",
+      });
 
       //4.  Set a cookie with Cookie-Parser for the user
       res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
@@ -121,7 +135,8 @@ const signinUser = async (req, res) => {
 
       //5. send user data
       // return res.status(201).send(user);
-      res.redirect("/dashboard");
+
+      res.redirect("/dashboard/" + user.id);
     } else {
       //Password Does not Match
       // return res.status(401).send("Password does not match.");
@@ -131,17 +146,81 @@ const signinUser = async (req, res) => {
   } else {
     //User Does not Exist
     // return res.status(401).send("User does not exist");
-    signinErrors.push({ msg: "User does not exist " });
+    signinErrors.push({ msg: "User does not exist." });
     res.render("signin", { signinErrors: signinErrors });
   }
 };
 
 const logoutUser = async (req, res) => {
-
   //Setting jwt token to empty string and setting its age to 1ms.
-  res.cookie("jwt", "", {maxAage:1});
-  res.redirect('/'); 
+  res.cookie("jwt", "", { maxAage: 1 });
+  res.cookie("userData", "", { maxAage: 1 });
+  res.cookie("allRepositories", "", { maxAage: 1 });
+  res.redirect("/");
+};
 
+const deleteUser = async (req, res) => {
+  const id = req.cookies.userData.id;
+  const firstName = req.cookies.userData.firstName;
+
+  try {
+    const isDeleted = await User.destroy({ where: { id: id } });
+    if (isDeleted) {
+      res.redirect("/");
+    } else {
+      const allRepositories = req.cookies.allRepositories;
+      res.render("dashboard", { firstName, allRepositories });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const renderEditUserPage = async (req, res) => {
+  const id = req.cookies.userData.id;
+  const email = req.cookies.userData.email;
+  const firstName = req.cookies.userData.firstName;
+  const lastName = req.cookies.userData.lastName;
+
+  res.render("editUser", { id, firstName, lastName, email });
+};
+
+const saveEditUser = async (req, res) => {
+  let editErrors = [];
+  const id = req.cookies.userData.id;
+  const { firstName, lastName, email, password } = req.body;
+
+  if (!firstName || !lastName || !email || !password) {
+    editErrors.push({ msg: "Please fill in all fields." });
+  }
+
+  //Validation
+  if (password.length < 6) {
+    editErrors.push({ msg: "Password should be atleast 6 characters." });
+  }
+
+  if (editErrors.length > 0) {
+    res.render("editUser", { id, firstName, lastName, email, editErrors });
+  } else {
+    const saltRounds = 8;
+    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    try {
+      const editUser = await User.update(
+        { firstName, lastName, email, password: hashedPassword },
+        { where: { id: id } }
+      );
+
+      if (editUser) {
+        const user = await User.findOne({ where: { id: id } });
+        res.cookie("userData", user);
+        res.redirect(`dashboard/${id}`);
+      } else {
+        res.render("editUser", { id, firstName, lastName, email, editErrors });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
 };
 
 module.exports = {
@@ -151,5 +230,8 @@ module.exports = {
   renderDashboard,
   signupUser,
   signinUser,
-  logoutUser
+  logoutUser,
+  deleteUser,
+  renderEditUserPage,
+  saveEditUser,
 };
