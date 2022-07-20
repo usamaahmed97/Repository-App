@@ -178,19 +178,18 @@ const deleteUser = async (req, res) => {
 
 const renderEditUserPage = async (req, res) => {
   const id = req.cookies.userData.id;
-  const email = req.cookies.userData.email;
   const firstName = req.cookies.userData.firstName;
   const lastName = req.cookies.userData.lastName;
 
-  res.render("editUser", { id, firstName, lastName, email });
+  res.render("editUser", { id, firstName, lastName});
 };
 
 const saveEditUser = async (req, res) => {
   let editErrors = [];
   const id = req.cookies.userData.id;
-  const { firstName, lastName, email, password } = req.body;
+  const { firstName, lastName, password } = req.body;
 
-  if (!firstName || !lastName || !email || !password) {
+  if (!firstName || !lastName || !password) {
     editErrors.push({ msg: "Please fill in all fields." });
   }
 
@@ -200,13 +199,13 @@ const saveEditUser = async (req, res) => {
   }
 
   if (editErrors.length > 0) {
-    res.render("editUser", { id, firstName, lastName, email, editErrors });
+    res.render("editUser", { id, firstName, lastName, editErrors });
   } else {
     const saltRounds = 8;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
     try {
       const editUser = await User.update(
-        { firstName, lastName, email, password: hashedPassword },
+        { firstName, lastName, password: hashedPassword },
         { where: { id: id } }
       );
 
@@ -215,7 +214,7 @@ const saveEditUser = async (req, res) => {
         res.cookie("userData", user);
         res.redirect(`dashboard/${id}`);
       } else {
-        res.render("editUser", { id, firstName, lastName, email, editErrors });
+        res.render("editUser", { id, firstName, lastName, editErrors });
       }
     } catch (err) {
       console.log(err);

@@ -1,8 +1,11 @@
 <%- include("secondHeader") -%>
 <script src="app.js"></script>
 
-<h1 class="display-4 fw-bold lh-1 mb-3">Your Repositories</h1>
-
+<div style="display: flex; justify-content: space-between; margin-top: 20px;">
+  <h1 class="display-4 fw-bold lh-1 mb-3">Your Repositories</h1>
+  <a href="/dashboard/<%= id %>" class="btn btn-danger my-4" style="background-color: #363062; color:#ffffff; border:none">BACK TO DASHBOARD</a>
+  
+</div>
 
 <section>
     <div class="table-responsive">
@@ -29,7 +32,7 @@
                 <td><%= yourRepositories[i].userId%></td>
                 <td>
                   <a role="button" href = "/yourRepositories/<%=yourRepositories[i].id %>/edit" class="btn btn-dark">Edit</a>
-                  <a role="button" href = "/yourRepositories/<%=yourRepositories[i].id %>/delete"class="btn btn-danger">Delete</a>
+                  <a role="button" href = "/yourRepositories/<%=yourRepositories[i].id %>/delete"class="btn" style="background-color: #363062; color:#ffffff">Delete</a>
                 
                 </td>
 
@@ -44,10 +47,10 @@
           
   </section>
 
-  <div class="col-lg-12 col-md-8 mx-auto">
+   
 
-    <a href="/dashboard/<%= id %>" class="btn btn-danger my-2">BACK TO DASHBOARD</a><br>
-  </div>
+    
+ 
 
 
 <%- include("footer") -%>
