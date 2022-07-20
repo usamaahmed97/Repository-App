@@ -10,6 +10,7 @@ require("dotenv").config();
 const { requireAuth } = require("./middleware/auth");
 const User = require("./models/User");
 const Repository = require("./models/Repository");
+ 
 
 const app = express();
 
@@ -74,6 +75,8 @@ sequelize
   .catch((err) => {
     console.log(`DB Connection Error: ${err}`);
   });
+
+  
 
 //HOME PAGE
 app.get("/", renderHomePage);
