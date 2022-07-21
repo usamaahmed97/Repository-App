@@ -1,16 +1,10 @@
 <%- include("header") -%>
 
 <main>
-  <div class="px-4 py-5 my-5 text-center">
-    <img
-      class="d-block mx-auto mb-4"
-      src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxleHBsb3JlLWZlZWR8MXx8fGVufDB8fHx8&w=1000&q=80"
-      alt=""
-      width="450px"
-      height="300px"
-    />
-    <h1 class="display-5 fw-bold">Repository Notes</h1>
-    <div class="col-lg-6 mx-auto">
+  <div style="display: flex;" >
+    
+    <div class="col-lg-6 mx-auto" style="margin-top: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+      <h1 class="display-5 fw-bold"  style="font-size: 400%;">Repository Notes</h1>
       <p class="lead mb-4">
         This CRUD App is developed using Node JS, Express, EJS, Sequelize,
         Bcrypt, JWT, cookie-parser, and Postgres database.
@@ -24,12 +18,20 @@
           style="background-color: #363062; color: #ffffff; border: none"
           >Sign In</a
         >
-
+        
         <a type="button" class="btn btn-lg px-4 btn-dark" href="/signup"
           >Sign Up</a
         >
       </div>
     </div>
+
+    <img
+      class="d-block mx-auto mb-4"
+      src="./images/globe.png"
+      alt=""
+      width="60%"
+      height="60%"
+    />
   </div>
 </main>
 
