@@ -26,6 +26,7 @@ const renderDashboard = async (req, res) => {
   const firstName = req.cookies.userData.firstName;
   const secondName = req.cookies.userData.secondName;
   const email = req.cookies.userData.email;
+  const jwtToken = req.cookies.jwt;
 
   if (req.params.id == id) {
     // user ID passed through params matches with the user ID stores in cookies.
@@ -35,7 +36,7 @@ const renderDashboard = async (req, res) => {
     const allRepositories = await Repository.findAll({ raw: true });
     res.cookie("allRepositories", allRepositories);
 
-    res.render("dashboard", { firstName, allRepositories });
+    res.render("dashboard", { firstName, allRepositories, jwtToken, id });
   } else {
     //User is trying to pass some other ID in the params that does not match with the ID stored in cookies.
     res.redirect("/signin");
@@ -169,7 +170,7 @@ const deleteUser = async (req, res) => {
       res.redirect("/");
     } else {
       const allRepositories = req.cookies.allRepositories;
-      res.render("dashboard", { firstName, allRepositories });
+      res.render("dashboard", { firstName, allRepositories, id });
     }
   } catch (err) {
     console.log(err);

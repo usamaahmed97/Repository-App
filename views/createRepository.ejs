@@ -1,4 +1,9 @@
-<%- include("secondHeader") -%>
+<% if(typeof(firstName) !== 'undefined') {%> 
+  <%- include("secondHeader", {firstName, id}); -%>
+<% }else{%>
+  <%- include("secondHeader"); -%>
+<% }%>
+
 
 
 <div class="container col-xl-12 col-xxl-8 px-4 py-5">

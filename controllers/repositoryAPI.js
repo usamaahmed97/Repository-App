@@ -8,6 +8,7 @@ const Repository = require("../models/Repository");
 
 const renderYourRepositoriesPage = async (req, res) => {
   const id = req.cookies.userData.id;
+  const firstName = req.cookies.userData.firstName;
 
   const yourRepositories = await Repository.findAll(
     { where: { userId: id } },
@@ -15,11 +16,13 @@ const renderYourRepositoriesPage = async (req, res) => {
   );
   res.cookie("yourRepositories", yourRepositories);
 
-  res.render("yourRepositories", { yourRepositories, id });
+  res.render("yourRepositories", { yourRepositories, id, firstName });
 };
 
 const createRepositoryPage = (req, res) => {
-  res.render("createRepository");
+  const firstName = req.cookies.userData.firstName;
+  const id = req.cookies.userData.id;
+  res.render("createRepository", {firstName, id});
 };
 
 const createYourRepository = async (req, res) => {
@@ -35,6 +38,7 @@ const createYourRepository = async (req, res) => {
       repositoryName,
       repositoryDescription,
       createRepositoryErrors,
+      id
     });
   } else {
     try {
@@ -57,6 +61,7 @@ const createYourRepository = async (req, res) => {
           repositoryName,
           repositoryDescription,
           createRepositoryErrors,
+          id
         });
       }
     } catch (err) {
@@ -95,6 +100,7 @@ const deleteYourRepositories = async (req, res) => {
 
 const renderEditRepositoriesPage = async (req, res) => {
   const id = req.params.id;
+  const firstName = req.cookies.userData.firstName;
   //Finding the details of the rep based on the ID passed.
 
   try {
@@ -105,7 +111,7 @@ const renderEditRepositoriesPage = async (req, res) => {
     res.cookie("editRepository", editRepository);
 
     if (editRepository) {
-      res.render("yourRepositoriesEdit", { editRepository });
+      res.render("yourRepositoriesEdit", { editRepository, firstName, id });
     } else {
       res.redirect("/yourRepositories");
     }
@@ -119,13 +125,14 @@ const editRepository = async (req, res) => {
 
   const { repositoryName, repositoryDescription } = req.body;
   const id = req.cookies.editRepository.id;
+  const firstName = req.cookies.editRepository.firstName;
 
   if (!repositoryName || !repositoryDescription) {
     repositoryErrors.push({ msg: "Please fill in all fields." });
   }
 
   if (repositoryErrors.length > 0) {
-    res.render("yourRepositoriesEdit", { editRepository, repositoryErrors });
+    res.render("yourRepositoriesEdit", { editRepository, repositoryErrors, firstName, id });
   } else {
     try {
       const isUpdated = await Repository.update(
@@ -149,6 +156,9 @@ const editRepository = async (req, res) => {
         res.render("yourRepositoriesEdit", {
           editRepository,
           repositoryErrors,
+          firstName,
+          id
+          
         });
       }
     } catch (err) {
