@@ -1,4 +1,8 @@
-<%- include("secondHeader") -%>
+<% if(typeof(firstName) !== 'undefined') {%> 
+  <%- include("secondHeader", {firstName, id}); -%>
+<% }else{%>
+  <%- include("secondHeader"); -%>
+<% }%>
 <script src="app.js"></script>
 
 <div style="display: flex; justify-content: space-between; margin-top: 20px;">

@@ -1,12 +1,9 @@
-<%- include("secondHeader") -%>
-<h1 class="display-4 fw-bold lh-1 mb-3" style="margin-top: 20px;">Dashboard</h1>
-
- 
 <% if(typeof(firstName) !== 'undefined') {%> 
+<%- include("secondHeader", {firstName, id}); -%>
+<h1 class="display-4 fw-bold lh-1 mb-3" style="margin-top: 20px;">Dashboard</h1>
 <div style="display: flex; justify-content: space-between; align-items: center;">
   <h3>Welcome back,  <%= firstName %>!</h3>
-  <form action="/deleteUser" method="delete" style="display: flex; justify-content: space-between; align-items: center;">
-    <a href="/editUser" class="btn btn-danger my-2"  style="background-color: #363062; color:#ffffff; border: none; margin-right: 5px;">Edit User</a>
+  <form action="/deleteUser" method="delete" style="display: flex; justify-content: space-between; align-items: center;"> 
    
     <!-- Button trigger modal -->
     <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#exampleModalCenter">
