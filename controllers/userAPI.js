@@ -24,8 +24,7 @@ const renderDashboard = async (req, res) => {
 
   const id = req.cookies.userData.id;
   const firstName = req.cookies.userData.firstName;
-  const secondName = req.cookies.userData.secondName;
-  const email = req.cookies.userData.email;
+  const userType = req.cookies.userData.userType;
   const jwtToken = req.cookies.jwt;
 
   if (req.params.id == id) {
@@ -36,7 +35,13 @@ const renderDashboard = async (req, res) => {
     const allRepositories = await Repository.findAll({ raw: true });
     res.cookie("allRepositories", allRepositories);
 
-    res.render("dashboard", { firstName, allRepositories, jwtToken, id });
+    res.render("dashboard", {
+      firstName,
+      allRepositories,
+      jwtToken,
+      id,
+      userType,
+    });
   } else {
     //User is trying to pass some other ID in the params that does not match with the ID stored in cookies.
     res.redirect("/signin");
@@ -45,6 +50,7 @@ const renderDashboard = async (req, res) => {
 
 const signupUser = async (req, res) => {
   const { firstName, lastName, email, password } = req.body;
+  const userType = "admin";
   let errors = [];
 
   //Validation
@@ -64,7 +70,7 @@ const signupUser = async (req, res) => {
     const match = await User.findOne({ where: { email: email } });
 
     if (match) {
-      errors.push({ msg: "Email already registered." });
+      errors.push({ msg: "Incorrect email or password." });
       res.render("signup", { errors, firstName, lastName, email, password });
     } else {
       //Password Hashing Logic
@@ -76,6 +82,7 @@ const signupUser = async (req, res) => {
         lastName: lastName,
         email: email,
         password: hashedPassword,
+        userType: userType,
       });
 
       if (user) {
@@ -147,7 +154,7 @@ const signinUser = async (req, res) => {
   } else {
     //User Does not Exist
     // return res.status(401).send("User does not exist");
-    signinErrors.push({ msg: "User does not exist." });
+    signinErrors.push({ msg: "Incorrect email or password" });
     res.render("signin", { signinErrors: signinErrors });
   }
 };
@@ -182,7 +189,7 @@ const renderEditUserPage = async (req, res) => {
   const firstName = req.cookies.userData.firstName;
   const lastName = req.cookies.userData.lastName;
 
-  res.render("editUser", { id, firstName, lastName});
+  res.render("editUser", { id, firstName, lastName });
 };
 
 const saveEditUser = async (req, res) => {
@@ -223,6 +230,173 @@ const saveEditUser = async (req, res) => {
   }
 };
 
+const renderSuperAdminSignupPage = (req, res) => {
+  res.render("superAdminSignup");
+};
+
+const superAdminSignup = async (req, res) => {
+  const { firstName, lastName, email, password } = req.body;
+  const userType = "superAdmin";
+  let errors = [];
+
+  //Validation
+  if (!firstName || !lastName || !email || !password) {
+    errors.push({ msg: "Please fill in all fields." });
+  }
+
+  //Validation
+  if (password.length < 6) {
+    errors.push({ msg: "Password should be atleast 6 characters." });
+  }
+
+  if (errors.length > 0) {
+    res.render("superAdminSignup", {
+      errors,
+      firstName,
+      lastName,
+      email,
+      password,
+    });
+  } else {
+    //User exist Validation
+    const match = await User.findOne({ where: { email: email } });
+
+    if (match) {
+      errors.push({ msg: "Incorrect email or password." });
+      res.render("superAdminSignup", {
+        errors,
+        firstName,
+        lastName,
+        email,
+        password,
+      });
+    } else {
+      //Password Hashing Logic
+      const saltRounds = 8;
+      const hashedPassword = await bcrypt.hash(password, saltRounds);
+
+      const user = await User.create({
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        password: hashedPassword,
+        userType: userType,
+      });
+
+      if (user) {
+        let token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+          expiresIn: "1hr",
+        });
+        res.cookie("jwt", token, { maxAge: 1 * 24 * 60 * 60, httpOnly: true });
+        console.log("user", JSON.stringify(user, null, 2));
+        console.log("Token: " + token);
+        //send users details
+
+        res.redirect("/signin");
+      } else {
+        res.render("superAdminSignup", {
+          errors,
+          firstName,
+          lastName,
+          email,
+          password,
+        });
+      }
+    }
+  }
+};
+
+const renderAllUsersPage = async (req, res) => {
+  const userType = "admin";
+  const id = req.cookies.userData.id;
+  const firstName = req.cookies.userData.firstName;
+
+  try {
+    const allUsers = await User.findAll(
+      { where: { userType: userType } },
+      { raw: true }
+    );
+    res.render("allUsers", { allUsers, id, firstName });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const renderEditAllUsersPage = async (req, res) => {
+  let id = req.params.id;
+
+  //Storing the id in cookie.
+  res.cookie("selectedUserID", id);
+
+  const userType = "admin";
+
+  //query to get the first name and last name using ID.
+
+  try {
+    const editUser = await User.findOne({ where: { id: id } }, { raw: true });
+    console.log("Edit User data: ", editUser);
+    //The user data is gathered from the editUser object.
+    const { firstName, lastName } = editUser;
+    res.render("allUsersEdit", { id, firstName, lastName });
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+const updateAdminUser = async (req, res) => {
+  const firstName = req.body.firstName;
+  const lastName = req.body.lastName;
+  let id = req.cookies.selectedUserID;
+  let errors = [];
+
+  if (!firstName || !lastName) {
+    errors.push({ msg: "Please fill in all fields." });
+  }
+  if (errors.length > 0) {
+    res.render("allUsersEdit", { id, firstName, lastName, errors });
+  } else {
+    try {
+      const editUser = await User.update(
+        { firstName, lastName },
+        { where: { id: id } }
+      );
+
+      if (editUser) {
+        id = req.cookies.userData.id;
+
+        //refreshing the data.
+        const allUsers = await User.findAll(
+          { where: { userType: "admin" } },
+          { raw: true }
+        );
+        res.render("allUsers", { allUsers, id, firstName });
+      } else {
+        res.render("allUsersEdit", { id, firstName, lastName });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+};
+
+const deleteAdminUser = async (req, res) => {
+  let id = req.params.id;
+  const userType = "admin";
+  const firstName = req.cookies.userData.firstName;
+
+  try {
+    const isDeleted = await User.destroy({ where: { id: id } });
+    if (isDeleted) {
+      //Refreshing the data
+      id = req.cookies.userData.id;
+      const allUsers = await User.findAll({ where: { userType: userType } });
+      res.render("allUsers", { allUsers, id, firstName });
+    }
+  } catch (err) {
+    console.log(err);
+  }
+};
+
 module.exports = {
   renderHomePage,
   renderSignupPage,
@@ -234,4 +408,10 @@ module.exports = {
   deleteUser,
   renderEditUserPage,
   saveEditUser,
+  renderSuperAdminSignupPage,
+  superAdminSignup,
+  renderAllUsersPage,
+  renderEditAllUsersPage,
+  deleteAdminUser,
+  updateAdminUser,
 };

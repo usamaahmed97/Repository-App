@@ -1,0 +1,58 @@
+<% if(typeof(firstName) !== 'undefined') {%> 
+    <%- include("secondHeader", {firstName, id}); -%>
+  <% }else{%>
+    <%- include("secondHeader"); -%>
+  <% }%>
+  <script src="app.js"></script>
+  
+  <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+    <h1 class="display-4 fw-bold lh-1 mb-3">All Users</h1>
+    <a href="/dashboard/<%= id%>" class="btn btn-danger my-4" style="background-color: #363062; color:#ffffff; border:none">BACK TO DASHBOARD</a>
+    
+  </div>
+  
+  <section>
+      <div class="table-responsive">
+          <table class="table table-striped table-sm">
+  
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">First Name</th>
+                <th scope="col">Last Name</th>
+                <th scope="col">email</th>
+                <th scope="col">Functions</th>
+               
+              </tr>
+            </thead>
+  
+            <tbody>
+              <% let i=0; while(i !=allUsers.length){ %>
+                
+                <tr>
+                  <td><%=allUsers[i].id%></td>
+                  <td><%=allUsers[i].firstName%></td>
+                  <td><%=allUsers[i].lastName%></td>
+                  <td><%=allUsers[i].email%></td>
+                  <td>
+                    <a role="button" href = "/allUsers/<%=allUsers[i].id %>/edit" class="btn btn-dark">Edit</a>
+                    <a role="button" href = "/allUsers/<%=allUsers[i].id %>/delete"class="btn" style="background-color: #363062; color:#ffffff">Delete</a>
+                  
+                  </td>
+                </tr>
+             
+                <% i++ } %>
+              
+            </tbody>
+            
+          </table> 
+            
+    </section>
+  
+     
+  
+      
+   
+  
+  
+  <%- include("footer") -%>

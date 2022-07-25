@@ -1,0 +1,60 @@
+<% if(typeof(firstName) !== 'undefined') {%> 
+    <%- include("secondHeader", {firstName, id}); -%>
+  <% }else{%>
+    <%- include("secondHeader"); -%>
+  <% }%>
+  
+  
+  <div class="container col-xl-12 col-xxl-8 px-4 py-5">
+    <div class="row align-items-center g-lg-5 py-5">
+      <div class="col-md-10 mx-auto col-lg-5">
+        <div class="col-lg-12 text-center text-lg-center">
+          <h1 class="display-8 fw-bold lh-1 mb-3">Edit User</h1>
+        </div>
+  
+        <% if(typeof (errors)!= 'undefined') {%> <%
+        errors.forEach(function(error){%>
+        <div class="alert alert-danger" role="alert"><%= error.msg %></div>
+  
+        <% }); %> <% } %>
+        <form
+          class="needs-validation p-4 border rounded-3 bg-light"
+          novalidate
+          action="/updateAdminUser"
+          method="post"
+        >
+          <div class="form-floating mb-3">
+            <input
+              type="text"
+              class="form-control"
+              id="repositoryName"
+              value="<%= firstName%>"
+              name="firstName"
+              required
+            />
+            <label for="firstName">First Name</label>
+          </div>
+  
+          <div class="form-floating mb-3">
+            <input
+              type="text"
+              class="form-control"
+              id="lastName"
+              value="<%=lastName%>"
+              name="lastName"
+              required
+            />
+            <label for="firstName">Last Name</label>
+          </div>
+  
+           
+  
+          <button class="w-100 btn btn-lg btn-primary" type="submit" style="background-color: #363062; color:#ffffff; border: none;">
+            Save Changes
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+  <%- include("footer") -%>
+  
