@@ -119,6 +119,6 @@ app.get("/allUsers/:id/edit", requireAuth, renderEditAllUsersPage);
 app.get("/allUsers/:id/delete", requireAuth, deleteAdminUser);
 app.post("/updateAdminUser", updateAdminUser);
 
-//Port Listener
+//PORT LISTENER
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server is connected on ${PORT}`));

@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Repository = require("../models/Repository");
 const cookieParser = require("cookie-parser");
+const message = require(".././constants");
+const Timelog = require("../models/Timelog");
 
 const renderHomePage = (req, res) => {
   res.render("home");
@@ -55,12 +57,12 @@ const signupUser = async (req, res) => {
 
   //Validation
   if (!firstName || !lastName || !email || !password) {
-    errors.push({ msg: "Please fill in all fields." });
+    errors.push({ msg: message.fillAllFields });
   }
 
   //Validation
   if (password.length < 6) {
-    errors.push({ msg: "Password should be atleast 6 characters." });
+    errors.push({ msg: message.passwordValidation });
   }
 
   if (errors.length > 0) {
@@ -70,7 +72,7 @@ const signupUser = async (req, res) => {
     const match = await User.findOne({ where: { email: email } });
 
     if (match) {
-      errors.push({ msg: "Incorrect email or password." });
+      errors.push({ msg: message.incorrectInputs });
       res.render("signup", { errors, firstName, lastName, email, password });
     } else {
       //Password Hashing Logic
@@ -110,7 +112,7 @@ const signinUser = async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    signinErrors.push({ msg: "Please fill in all fields." });
+    signinErrors.push({ msg: message.fillAllFields });
   }
 
   if (signinErrors.length > 0) {
@@ -131,6 +133,9 @@ const signinUser = async (req, res) => {
       //Store the user in a cookie.
       res.cookie("userData", user);
 
+      //Get the user sign in time.
+      res.cookie("SigninTimestamp", Date.now());
+
       // 3. Generate a token with the user id using ( JWT )
       let token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
         expiresIn: "1hr",
@@ -148,23 +153,62 @@ const signinUser = async (req, res) => {
     } else {
       //Password Does not Match
       // return res.status(401).send("Password does not match.");
-      signinErrors.push({ msg: "Password does not match. " });
+      signinErrors.push({ msg: message.incorrectInputs });
       res.render("signin", { signinErrors: signinErrors });
     }
   } else {
     //User Does not Exist
     // return res.status(401).send("User does not exist");
-    signinErrors.push({ msg: "Incorrect email or password" });
+    signinErrors.push({ msg: message.incorrectInputs });
     res.render("signin", { signinErrors: signinErrors });
   }
 };
 
 const logoutUser = async (req, res) => {
-  //Setting jwt token to empty string and setting its age to 1ms.
+  //Finding the signed in elapsed time.
+  const totalLoginTime = Date.now() - req.cookies.SigninTimestamp;
+  const seconds = Math.floor((totalLoginTime / 1000) % 60);
+  const minutes = Math.floor((totalLoginTime / 1000 / 60) % 60);
+  const hours = Math.floor(totalLoginTime / 1000 / 60 / 60);
+  const humanized = [
+    pad(hours.toString(), 2),
+    pad(minutes.toString(), 2),
+    pad(seconds.toString(), 2),
+  ].join(":");
+
+  console.log("Total Sign in Time:" + humanized);
+
+  //Storing the elapsed time in timelog table.
+
+  try {
+    const timelog = await Timelog.create({
+      userId: req.cookies.userData.id,
+      timeElapsed: humanized,
+    });
+
+    if (timelog) {
+      console.log(timelog);
+    }
+  } catch (err) {
+    console.log(err);
+  }
+
+  //Setting cookie values to empty string and setting age to 1ms.
   res.cookie("jwt", "", { maxAage: 1 });
   res.cookie("userData", "", { maxAage: 1 });
   res.cookie("allRepositories", "", { maxAage: 1 });
+  res.cookie("SigninTimestamp", "", { maxAage: 1 });
+  res.cookie("yourRepositories", "", { maxAage: 1 });
+  res.cookie("editRepository", "", { maxAage: 1 });
+  res.cookie("selectedUserID", "", { maxAage: 1 });
+
   res.redirect("/");
+};
+
+const pad = (numberString, size) => {
+  let padded = numberString;
+  while (padded.length < size) padded = `0${padded}`;
+  return padded;
 };
 
 const deleteUser = async (req, res) => {
@@ -198,12 +242,12 @@ const saveEditUser = async (req, res) => {
   const { firstName, lastName, password } = req.body;
 
   if (!firstName || !lastName || !password) {
-    editErrors.push({ msg: "Please fill in all fields." });
+    editErrors.push({ msg: message.fillAllFields });
   }
 
   //Validation
   if (password.length < 6) {
-    editErrors.push({ msg: "Password should be atleast 6 characters." });
+    editErrors.push({ msg: message.passwordLengthValidation });
   }
 
   if (editErrors.length > 0) {
@@ -241,12 +285,12 @@ const superAdminSignup = async (req, res) => {
 
   //Validation
   if (!firstName || !lastName || !email || !password) {
-    errors.push({ msg: "Please fill in all fields." });
+    errors.push({ msg: message.fillAllFields });
   }
 
   //Validation
   if (password.length < 6) {
-    errors.push({ msg: "Password should be atleast 6 characters." });
+    errors.push({ msg: message.passwordLengthValidation });
   }
 
   if (errors.length > 0) {
@@ -262,7 +306,7 @@ const superAdminSignup = async (req, res) => {
     const match = await User.findOne({ where: { email: email } });
 
     if (match) {
-      errors.push({ msg: "Incorrect email or password." });
+      errors.push({ msg: message.incorrectInputs });
       res.render("superAdminSignup", {
         errors,
         firstName,
@@ -350,7 +394,7 @@ const updateAdminUser = async (req, res) => {
   let errors = [];
 
   if (!firstName || !lastName) {
-    errors.push({ msg: "Please fill in all fields." });
+    errors.push({ msg: message.fillAllFields });
   }
   if (errors.length > 0) {
     res.render("allUsersEdit", { id, firstName, lastName, errors });
