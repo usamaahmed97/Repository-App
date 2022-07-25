@@ -1,5 +1,5 @@
 const Sequelize = require("sequelize");
-const sequelize = require("../database/connection");
+const {sequelize} = require("../database/connection");
 
 const Timelog = sequelize.define("timelog", {
   id: {
