@@ -10,7 +10,6 @@ require("dotenv").config();
 const { requireAuth } = require("./middleware/auth");
 const User = require("./models/User");
 const Repository = require("./models/Repository");
- 
 
 const app = express();
 
@@ -25,6 +24,12 @@ const {
   deleteUser,
   renderEditUserPage,
   saveEditUser,
+  renderSuperAdminSignupPage,
+  superAdminSignup,
+  renderAllUsersPage,
+  updateAdminUser,
+  deleteAdminUser,
+  renderEditAllUsersPage,
 } = require("./controllers/userAPI");
 
 const {
@@ -76,8 +81,6 @@ sequelize
     console.log(`DB Connection Error: ${err}`);
   });
 
-  
-
 //HOME PAGE
 app.get("/", renderHomePage);
 
@@ -89,6 +92,8 @@ app.get("/logout", logoutUser);
 //SIGN UP
 app.get("/signup", renderSignupPage);
 app.post("/signup", signupUser);
+app.get("/superAdminSignup", renderSuperAdminSignupPage);
+app.post("/superAdminSignup", superAdminSignup);
 
 //DASHBOARD
 app.get("/dashboard/:id", requireAuth, renderDashboard);
@@ -105,6 +110,15 @@ app.post("/createYourRepository", requireAuth, createYourRepository);
 app.get("/yourRepositories/:id/delete", requireAuth, deleteYourRepositories);
 app.get("/yourRepositories/:id/edit", requireAuth, renderEditRepositoriesPage);
 app.post("/yourRepositories/edit", requireAuth, editRepository);
+
+//SEE ALL USERS PAGE
+app.get("/allUsers", requireAuth, renderAllUsersPage);
+
+//EDIT AND DELETE ALL USERS FUNCTIONALITY
+app.get("/allUsers/:id/edit", requireAuth, renderEditAllUsersPage);
+app.get("/allUsers/:id/delete", requireAuth, deleteAdminUser);
+app.post("/updateAdminUser", updateAdminUser);
+
 //Port Listener
 const PORT = process.env.PORT;
 app.listen(PORT, () => console.log(`Server is connected on ${PORT}`));
