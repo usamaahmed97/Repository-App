@@ -5,6 +5,7 @@ require("dotenv").config();
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const Repository = require("../models/Repository");
+const message = require(".././constants");
 
 const renderYourRepositoriesPage = async (req, res) => {
   const id = req.cookies.userData.id;
@@ -22,7 +23,7 @@ const renderYourRepositoriesPage = async (req, res) => {
 const createRepositoryPage = (req, res) => {
   const firstName = req.cookies.userData.firstName;
   const id = req.cookies.userData.id;
-  res.render("createRepository", {firstName, id});
+  res.render("createRepository", { firstName, id });
 };
 
 const createYourRepository = async (req, res) => {
@@ -30,7 +31,7 @@ const createYourRepository = async (req, res) => {
   const id = req.cookies.userData.id;
   const { repositoryName, repositoryDescription } = req.body;
   if (!repositoryName || !repositoryDescription) {
-    createRepositoryErrors.push({ msg: "Please fill in all fields." });
+    createRepositoryErrors.push({ msg: message.fillAllFields });
   }
 
   if (createRepositoryErrors.length > 0) {
@@ -38,7 +39,7 @@ const createYourRepository = async (req, res) => {
       repositoryName,
       repositoryDescription,
       createRepositoryErrors,
-      id
+      id,
     });
   } else {
     try {
@@ -56,12 +57,12 @@ const createYourRepository = async (req, res) => {
         res.cookie("allRepositories", allRepositories);
         res.redirect("/dashboard/" + req.cookies.userData.id);
       } else {
-        createRepositoryErrors.push({ msg: "Error creating Repository." });
+        createRepositoryErrors.push({ msg: message.repositoryError });
         res.render("createRepository", {
           repositoryName,
           repositoryDescription,
           createRepositoryErrors,
-          id
+          id,
         });
       }
     } catch (err) {
@@ -128,11 +129,16 @@ const editRepository = async (req, res) => {
   const firstName = req.cookies.editRepository.firstName;
 
   if (!repositoryName || !repositoryDescription) {
-    repositoryErrors.push({ msg: "Please fill in all fields." });
+    repositoryErrors.push({ msg: message.fillAllFields });
   }
 
   if (repositoryErrors.length > 0) {
-    res.render("yourRepositoriesEdit", { editRepository, repositoryErrors, firstName, id });
+    res.render("yourRepositoriesEdit", {
+      editRepository,
+      repositoryErrors,
+      firstName,
+      id,
+    });
   } else {
     try {
       const isUpdated = await Repository.update(
@@ -152,13 +158,12 @@ const editRepository = async (req, res) => {
           { raw: true }
         );
         res.cookie("editRepository", editRepository);
-        repositoryErrors.push({ msg: "Repository could not be updated." });
+        repositoryErrors.push({ msg: message.repositoryUpdateError });
         res.render("yourRepositoriesEdit", {
           editRepository,
           repositoryErrors,
           firstName,
-          id
-          
+          id,
         });
       }
     } catch (err) {
