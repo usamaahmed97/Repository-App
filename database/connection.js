@@ -3,15 +3,15 @@ require("dotenv").config();
 const Sequelize = require("sequelize");
 
 if (process.env.NODE_ENV === "production") {
-  const connectionString = `postgresql://${process.env.PG_USER}:${process.env.PG_PASSWORD}@${process.env.PG_HOST}:${process.env.PG_PORT}/${process.env.PG_DATABASE}`;
-  var pool = new Pool({
-    connectionString: "production"
-      ? process.env.DATABASE_URL
-      : connectionString,
-    ssl: {
-      rejectUnauthorized: false,
-    },
-  });
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+      dialectOptions: {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false
+        }
+      }
+    }
+  );
 } else {
   var sequelize = new Sequelize(
     process.env.PG_DATABASE,
@@ -25,5 +25,5 @@ if (process.env.NODE_ENV === "production") {
   );
 }
 
-module.exports = { sequelize, pool };
+module.exports = { sequelize };
 global.sequelize = sequelize;
