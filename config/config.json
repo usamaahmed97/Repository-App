@@ -2,7 +2,7 @@
   "development": {
     "username": "postgres",
     "password": "root",
-    "database": "repository-app",
+    "database": "repo2",
     "host": "127.0.0.1",
     "dialect": "postgres"
   },

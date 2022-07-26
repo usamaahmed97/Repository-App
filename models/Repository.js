@@ -27,7 +27,7 @@ const Repository = sequelize.define("repository", {
       key: "id",
     },
   },
-});
+},{ timestamps: false });
 
 User.hasMany(Repository);
 Repository.belongsTo(User);

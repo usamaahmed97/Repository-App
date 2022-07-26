@@ -31,10 +31,10 @@ const User = sequelize.define("user", {
   userType:{
     type: Sequelize.STRING,
     allowNull: false,
-  }
-}, {
-  sequelize,
-  tableName: "user"
-});
+  },
+  
+},
 
-module.exports =User;
+{ timestamps: false });
+
+module.exports = User;

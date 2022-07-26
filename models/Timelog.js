@@ -1,5 +1,6 @@
 const Sequelize = require("sequelize");
 const {sequelize} = require("../database/connection");
+const User = require("./User");
 
 const Timelog = sequelize.define("timelog", {
   id: {
@@ -18,6 +19,9 @@ const Timelog = sequelize.define("timelog", {
     type: Sequelize.STRING,
     allowNull: true,
   },
-});
+},{ timestamps: false });
+
+User.hasMany(Timelog);
+Timelog.belongsTo(User);
 
 module.exports = Timelog;
