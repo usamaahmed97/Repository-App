@@ -27,7 +27,7 @@ module.exports = {
           key: "id",
         },
       },
-    });
+    }, { timestamps: false });
   },
 
   async down(queryInterface, Sequelize) {

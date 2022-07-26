@@ -15,7 +15,7 @@ module.exports = {
 
     await queryInterface.changeColumn('user', 'userType', {
 
-      type: Sequelize.INTEGER,
+      type: Sequelize.STRING,
 
     });
     

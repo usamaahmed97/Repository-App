@@ -6,6 +6,10 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.addColumn("timelog", "signoutTime");
+    await queryInterface.addColumn("timelog", "signoutTime", {
+      type: Sequelize.TIME,
+      allowNull: true,
+
+    });
   }
 };
